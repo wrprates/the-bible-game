@@ -300,7 +300,7 @@ const MISSIONS = [
     hero: "Moisés",
     title: "Moisés no Sinai",
     reference: "Êxodo 19–34",
-    intro: "Suba ao Sinai, receba as tábuas, desça e confronte o bezerro de ouro. As tábuas se quebram — mas Deus renova o pacto.",
+    intro: "Suba ao Sinai, receba as tábuas. Desça e encontre o bezerro de ouro no vale — as tábuas se quebram. Suba o monte de novo: Deus renova o pacto.",
     bgTop: "#3a2a50",
     bgBottom: "#8a6a92",
     groundColor: "#8a6a46",
@@ -308,25 +308,25 @@ const MISSIONS = [
     closingVerse: "\"A lei foi dada por meio de Moisés; a graça e a verdade vieram por Jesus Cristo.\" — João 1:17",
     scrolls: [
       {
-        title: "Santificação do povo",
-        verse: "\"Santifica-os hoje e amanhã, e lavem eles os seus vestidos.\" — Êxodo 19:10",
-        context: "Três dias de consagração preparam o encontro com Deus. Santidade não é legalismo — é reverência diante de quem é Santo."
-      },
-      {
         title: "As tábuas do testemunho",
         verse: "\"Deu-lhe as duas tábuas do testemunho... escritas pelo dedo de Deus.\" — Êxodo 31:18",
         context: "Os Dez Mandamentos foram gravados diretamente pelo dedo de Deus — o texto mais imediato e pessoal da revelação escrita."
+      },
+      {
+        title: "As novas tábuas",
+        verse: "\"Lavra duas tábuas de pedra, como as primeiras.\" — Êxodo 34:1",
+        context: "A graça após a falha. Moisés agora lavra as pedras; Deus reescreve as palavras (34:28) — cooperação humana no pacto renovado."
+      },
+      {
+        title: "Santificação do povo",
+        verse: "\"Santifica-os hoje e amanhã, e lavem eles os seus vestidos.\" — Êxodo 19:10",
+        context: "Três dias de consagração preparam o encontro com Deus. Santidade não é legalismo — é reverência diante de quem é Santo."
       },
       {
         title: "O bezerro de ouro",
         verse: "\"Fez dele um bezerro fundido. E disseram: 'Estes são os teus deuses, ó Israel.'\" — Êxodo 32:4",
         context: "A apostasia vem enquanto Moisés ainda recebe a Lei. Ao descer e ver a cena, ele quebra as tábuas aos pés do Sinai (32:19).",
         onCollect: "break-tablets"
-      },
-      {
-        title: "As novas tábuas",
-        verse: "\"Lavra duas tábuas de pedra, como as primeiras.\" — Êxodo 34:1",
-        context: "A graça após a falha. Moisés agora lavra as pedras; Deus reescreve as palavras (34:28) — cooperação humana no pacto renovado."
       }
     ],
     quiz: {
@@ -337,15 +337,15 @@ const MISSIONS = [
     },
     map: [
       "...........................................................................",
-      ".............................S...........................S...............",
-      "...........................=====.......................=====.............",
-      "...........................................................................",
-      "......................=====.......................=====..........G.......",
-      ".................................................................G.......",
-      ".................=====.......................=====...............G.......",
-      ".................................................................G.......",
-      "............=====.......................=====....................G.......",
-      ".....E.S...........................E......S....B.................G.......",
+      ".............S........................S.....................G..............",
+      ".............#........................#.....................G..............",
+      "............###......................###....................G..............",
+      "...........#####....................#####...................G..............",
+      "..........#######..................#######..................G..............",
+      ".........#########................#########.................G..............",
+      "........###########..............###########................G..............",
+      ".......#############............#############...............G..............",
+      ".NS.N.###############.NS.EB.E.N###############..............G..............",
       "###########################################################################",
       "###########################################################################",
       "###########################################################################",
@@ -356,11 +356,11 @@ const MISSIONS = [
     ],
     platforms: [
       {
-        // Glória do Senhor — nuvem sobre o cume (Êx 19:20)
-        x: 28 * TILE, y: 3 * TILE,
+        // Glória do Senhor — nuvem sobre o cume do Sinai (Êx 19:20)
+        x: 10 * TILE, y: 1 * TILE,
         w: 72, h: 22,
         axis: "x", speed: 0.45,
-        min: 24 * TILE, max: 36 * TILE,
+        min: 6 * TILE, max: 15 * TILE,
         theme: "cloud",
         trigger: {
           title: "A glória sobre o monte",

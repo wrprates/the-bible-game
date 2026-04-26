@@ -463,6 +463,9 @@
     state.windGusts = [];
     state.nextWindAt = 120;
     state.windHits = 0;
+    state.rocks = [];
+    state.nextRockAt = 180;
+    state.rockHits = 0;
     state.friendNPCs = [];
     state.dying = false;
     state.dyingTimer = 0;
@@ -594,11 +597,19 @@
           // Janela de oração — preserva o tile (renderizado como janela).
           state.prayerWindows.push({ x: wx, y: wy });
         } else if (t === "N") {
-          // Amigo NPC (Sadraque, Mesaque ou Abede-Nego).
+          // NPC figurante. Paleta varia por missão para refletir o cenário:
+          //   fornalha → Sadraque/Mesaque (azul, verde)
+          //   sinai → povo no deserto (tons terrosos)
+          //   pedro → discípulos no barco (azul, verde, marrom)
+          const palette = state.mission.id === "sinai"
+            ? ["#a87045", "#7a5230", "#c8975a", "#9a6a3a", "#b08458"]
+            : state.mission.id === "pedro"
+              ? ["#6a9ae0", "#80c890", "#a87045", "#7a8a9a"]
+              : ["#6a9ae0", "#80c890"];
           state.friendNPCs.push({
             x: wx, y: wy,
             w: 24, h: 28,
-            color: state.friendNPCs.length % 2 === 0 ? "#6a9ae0" : "#80c890"
+            color: palette[state.friendNPCs.length % palette.length]
           });
           state.tileMap[y][x] = ".";
         } else if (t === "A") {
@@ -1142,7 +1153,6 @@
               count: 6, color: "#4a4a4a", size: 3, life: 40, speed: 2.5, gravity: 0.25
             });
           }
-          state.lightningFlash = Math.max(state.lightningFlash, 6);
         }
         // Angel appears in the furnace (Dn 3:25) — activates fire immunity.
         if (entry && entry.onCollect === "angel-protect") {
@@ -1424,6 +1434,64 @@
       }
     }
 
+    // Pedras rolando do Sinai — "todo o monte tremia muito" (Êx 19:18).
+    // Spawn dos dois picos, caem por gravidade. 3 toques no jogador = morte.
+    if (state.mission.id === "sinai" && !state.finishing) {
+      state.nextRockAt--;
+      if (state.nextRockAt <= 0) {
+        state.nextRockAt = 90 + Math.floor(Math.random() * 70);
+        const peakCol = Math.random() < 0.5 ? 13 : 38;
+        state.rocks.push({
+          x: peakCol * TILE + TILE / 2 + (Math.random() - 0.5) * 14,
+          y: 1 * TILE,
+          vx: (Math.random() - 0.5) * 4.5,
+          vy: -2 + Math.random(),
+          radius: 9,
+          spin: 0,
+          spinSpeed: (Math.random() - 0.5) * 0.4,
+          dead: false
+        });
+      }
+      for (const r of state.rocks) {
+        if (r.dead) continue;
+        r.x += r.vx;
+        r.y += r.vy;
+        r.vy = Math.min(r.vy + 0.4, 12);
+        r.spin += r.spinSpeed;
+      }
+      // Colisão com o jogador
+      for (const r of state.rocks) {
+        if (r.dead) continue;
+        const rb = { x: r.x - r.radius, y: r.y - r.radius, w: r.radius * 2, h: r.radius * 2 };
+        if (rectsOverlap(p, rb) && p.invuln === 0) {
+          r.dead = true;
+          state.rockHits++;
+          spawnParticles(p.x + p.w / 2, p.y + p.h / 2, {
+            count: 10, color: "#a8967e", size: 2, life: 22, speed: 2.4
+          });
+          spawnParticles(r.x, r.y, {
+            count: 12, color: "#7a6852", size: 2, life: 20, speed: 2.6, gravity: 0.2
+          });
+          if (state.rockHits >= 3) {
+            // Esmagado pela pedra rolando — perde a fase.
+            state.lives = 0;
+            hurtPlayer();
+          } else {
+            p.vx = -2.5;
+            p.invuln = 30;
+            sfx("stonehit");
+          }
+          break;
+        }
+      }
+      state.rocks = state.rocks.filter((r) =>
+        !r.dead &&
+        r.y < state.mapH * TILE + 80 &&
+        r.x > state.camera.x - 200 &&
+        r.x < state.camera.x + W + 200
+      );
+    }
+
     // Storm — rain + lightning (Jonas only).
     if (state.mission.id === "jonas") {
       for (let i = 0; i < 3; i++) {
@@ -1640,6 +1708,13 @@
       }
     }
 
+    // Pedras rolando (Sinai) — desenhadas em cima da cena.
+    if (state.rocks && state.rocks.length > 0) {
+      for (const r of state.rocks) {
+        drawRock(r.x - camX, r.y, r.radius, r.spin);
+      }
+    }
+
     // Boss — render depends on mission.
     if (state.boss && state.boss.alive) {
       const drawBoss = state.mission.id === "sinai" ? drawCalf : drawGiant;
@@ -1819,6 +1894,29 @@
         }
       } else {
         ctx.fillText("Recolha a funda para vencer Golias", 22, 30);
+      }
+    }
+
+    // HUD — Sinai (pedras rolando)
+    if (state.mission && state.mission.id === "sinai" && !state.finishing) {
+      ctx.fillStyle = "rgba(0,0,0,0.55)";
+      ctx.fillRect(12, 12, 280, 50);
+      ctx.font = "bold 13px system-ui";
+      ctx.textAlign = "left";
+      ctx.fillStyle = "#ffe27a";
+      ctx.fillText("O monte treme — desvie das pedras", 22, 28);
+      const remaining = Math.max(0, 3 - (state.rockHits || 0));
+      ctx.fillStyle = "rgba(220,235,255,0.75)";
+      ctx.fillText("Vida:", 22, 48);
+      for (let i = 0; i < 3; i++) {
+        const filled = i < remaining;
+        ctx.fillStyle = filled ? "#ffe27a" : "rgba(120,120,120,0.45)";
+        ctx.beginPath();
+        ctx.arc(60 + i * 14, 44, 4.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = "rgba(0,0,0,0.4)";
+        ctx.lineWidth = 1;
+        ctx.stroke();
       }
     }
 
@@ -2187,6 +2285,47 @@
     ctx.restore();
   }
 
+  function drawRock(x, y, radius, spin) {
+    // Pedra rolando do Sinai — gradiente de pedra com manchas e brilho.
+    ctx.save();
+    ctx.translate(x, y);
+    // sombra suave embaixo
+    ctx.fillStyle = "rgba(0,0,0,0.3)";
+    ctx.beginPath();
+    ctx.ellipse(0, radius + 2, radius * 0.9, 2, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.rotate(spin);
+    // corpo
+    const grad = ctx.createRadialGradient(-radius * 0.3, -radius * 0.3, 1, 0, 0, radius);
+    grad.addColorStop(0, "#9a8775");
+    grad.addColorStop(0.55, "#5a4838");
+    grad.addColorStop(1, "#3a2e1e");
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(0, 0, radius, 0, Math.PI * 2);
+    ctx.fill();
+    // manchas escuras
+    ctx.fillStyle = "rgba(20,12,8,0.55)";
+    ctx.beginPath();
+    ctx.arc(-radius * 0.3, radius * 0.15, radius * 0.25, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(radius * 0.4, -radius * 0.25, radius * 0.18, 0, Math.PI * 2);
+    ctx.fill();
+    // brilho de luz
+    ctx.fillStyle = "rgba(255,245,220,0.22)";
+    ctx.beginPath();
+    ctx.arc(-radius * 0.45, -radius * 0.45, radius * 0.22, 0, Math.PI * 2);
+    ctx.fill();
+    // borda
+    ctx.strokeStyle = "rgba(0,0,0,0.45)";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.arc(0, 0, radius, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.restore();
+  }
+
   function drawBoatDecor(camX) {
     // Casco do barco dos discípulos — desenhado sobre o piso de '#' nos
     // tiles 0..11 (linhas 10..16). Apenas decorativo; a colisão usa os '#'.
@@ -2373,12 +2512,57 @@
   // --- Drawing primitives ----------------------------------------------------
   function drawTile(t, x, y) {
     if (t === "#") {
-      ctx.fillStyle = state.mission.groundColor;
-      ctx.fillRect(x, y, TILE, TILE);
-      ctx.fillStyle = "rgba(0,0,0,0.25)";
-      ctx.fillRect(x, y + TILE - 4, TILE, 4);
-      ctx.strokeStyle = "rgba(0,0,0,0.3)";
-      ctx.strokeRect(x + 0.5, y + 0.5, TILE - 1, TILE - 1);
+      const isSinai = state.mission && state.mission.id === "sinai";
+      const rowY = Math.floor(y / TILE);
+      // Em Sinai: tiles dos montes (rows 2-9) viram rocha com neve no topo;
+      // o piso (rows 10+) continua sendo terra padrão.
+      if (isSinai && rowY >= 2 && rowY <= 9) {
+        // Rocha base — tons frios de pedra acinzentada/violácea.
+        const grad = ctx.createLinearGradient(x, y, x, y + TILE);
+        grad.addColorStop(0, "#7a6b82");
+        grad.addColorStop(1, "#4a3e58");
+        ctx.fillStyle = grad;
+        ctx.fillRect(x, y, TILE, TILE);
+        // Manchas/sombras de fissuras
+        ctx.fillStyle = "rgba(20,15,30,0.35)";
+        const seed = (x * 13 + y * 7) % 20;
+        ctx.fillRect(x + 4 + (seed % 6), y + 8 + (seed % 5), 6, 2);
+        ctx.fillRect(x + 18, y + 18 + (seed % 4), 7, 2);
+        // Topo claro — luz incidindo (lado superior)
+        ctx.fillStyle = "rgba(255,240,220,0.18)";
+        ctx.fillRect(x, y, TILE, 3);
+        // Cap de neve para os 2 tiles mais altos do monte (rows 2 e 3)
+        if (rowY <= 3) {
+          ctx.fillStyle = "#f4f6fb";
+          ctx.fillRect(x, y, TILE, 8);
+          ctx.fillStyle = "#dadfe8";
+          ctx.fillRect(x, y + 7, TILE, 2);
+          // bordas onduladas (gotas de neve descendo um pouco)
+          ctx.fillStyle = "#f4f6fb";
+          ctx.beginPath();
+          ctx.moveTo(x + 4, y + 8);
+          ctx.lineTo(x + 6, y + 12);
+          ctx.lineTo(x + 8, y + 8);
+          ctx.closePath();
+          ctx.fill();
+          ctx.beginPath();
+          ctx.moveTo(x + 18, y + 8);
+          ctx.lineTo(x + 21, y + 13);
+          ctx.lineTo(x + 24, y + 8);
+          ctx.closePath();
+          ctx.fill();
+        }
+        // borda fina pra delimitar
+        ctx.strokeStyle = "rgba(0,0,0,0.25)";
+        ctx.strokeRect(x + 0.5, y + 0.5, TILE - 1, TILE - 1);
+      } else {
+        ctx.fillStyle = state.mission.groundColor;
+        ctx.fillRect(x, y, TILE, TILE);
+        ctx.fillStyle = "rgba(0,0,0,0.25)";
+        ctx.fillRect(x, y + TILE - 4, TILE, 4);
+        ctx.strokeStyle = "rgba(0,0,0,0.3)";
+        ctx.strokeRect(x + 0.5, y + 0.5, TILE - 1, TILE - 1);
+      }
     } else if (t === "=") {
       ctx.fillStyle = "#5a3d1e";
       ctx.fillRect(x, y + 6, TILE, TILE - 12);
@@ -2940,6 +3124,50 @@
       // eye
       ctx.fillStyle = "#1a1a1a";
       ctx.fillRect(x + (dir > 0 ? 16 : 10), y + 6, 2, 2);
+      return;
+    }
+    // Em Sinai o walker é um israelita "desenfreado" dançando ao bezerro
+    // (Êx 32:25). Túnica terrosa, braços levantados, postura de adoração caótica.
+    if (state.mission && state.mission.id === "sinai") {
+      // sombra
+      ctx.fillStyle = "rgba(0,0,0,0.25)";
+      ctx.fillRect(x + 2, y + 22, 20, 2);
+      // pernas
+      ctx.fillStyle = "#3a2a18";
+      ctx.fillRect(x + 6, y + 20, 4, 4);
+      ctx.fillRect(x + 14, y + 20, 4, 4);
+      // túnica terrosa
+      ctx.fillStyle = "#a87045";
+      ctx.fillRect(x + 4, y + 10, 16, 12);
+      ctx.fillStyle = "#8a5832";
+      ctx.fillRect(x + 4, y + 18, 16, 4);
+      // cinto
+      ctx.fillStyle = "#4a3018";
+      ctx.fillRect(x + 4, y + 16, 16, 1.5);
+      // braços levantados (oscilam — adoração caótica)
+      const wave = Math.sin(state.t / 5 + x * 0.07) * 3;
+      ctx.fillStyle = "#a87045";
+      ctx.fillRect(x + 1, y + 4 - wave, 4, 9);
+      ctx.fillRect(x + 19, y + 4 + wave, 4, 9);
+      // mãos
+      ctx.fillStyle = "#e6c08a";
+      ctx.fillRect(x + 1, y + 2 - wave, 4, 3);
+      ctx.fillRect(x + 19, y + 2 + wave, 4, 3);
+      // pele do rosto
+      ctx.fillStyle = "#e6c08a";
+      ctx.fillRect(x + 7, y + 2, 10, 9);
+      // cabelo escuro
+      ctx.fillStyle = "#2a1808";
+      ctx.fillRect(x + 6, y + 1, 12, 3);
+      ctx.fillRect(x + 6, y + 4, 2, 4);
+      ctx.fillRect(x + 16, y + 4, 2, 4);
+      // olhos
+      ctx.fillStyle = "#1a1a1a";
+      ctx.fillRect(x + 9, y + 6, 2, 2);
+      ctx.fillRect(x + 13, y + 6, 2, 2);
+      // boca aberta (gritando/dançando)
+      ctx.fillStyle = "#5a2010";
+      ctx.fillRect(x + 10, y + 9, 4, 2);
       return;
     }
     // default spiky hazard-crab-ish
