@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <title>The Bible Game — Jornadas Bíblicas</title>
+  <link rel="stylesheet" href="style.css?v=7" />
+</head>
+<body>
+  <div id="app">
+    <header class="hud">
+      <div class="hud-slot"><span class="label">Missão</span><span id="hud-mission">—</span></div>
+      <div class="hud-slot"><span class="label">Personagem</span><span id="hud-hero">—</span></div>
+      <div class="hud-slot"><span class="label">Pergaminhos</span><span id="hud-scrolls">0 / 0</span></div>
+      <div class="hud-slot"><span class="label">Vidas</span><span id="hud-lives">3</span></div>
+      <div class="hud-slot"><span class="label">Pontos</span><span id="hud-score">0</span></div>
+      <button id="hud-pause" class="hud-pause" aria-label="Pausar" title="Pausar (P)">⏸</button>
+    </header>
+
+    <main class="stage">
+      <canvas id="game" width="960" height="540"></canvas>
+
+      <div id="menu" class="overlay">
+        <div class="panel">
+          <h1>The Bible Game</h1>
+          <p class="tagline">Jornadas bíblicas em estilo plataforma.</p>
+          <div class="missions" id="missions-list"></div>
+          <div class="controls-help">
+            <strong>Controles:</strong>
+            <kbd>←</kbd>/<kbd>→</kbd> ou <kbd>A</kbd>/<kbd>D</kbd> — andar
+            · <kbd>Espaço</kbd> ou <kbd>↑</kbd> — pular
+            · <kbd>P</kbd> — pausar
+          </div>
+        </div>
+      </div>
+
+      <div id="scroll-popup" class="overlay hidden">
+        <div class="panel scroll-panel">
+          <h2 id="scroll-title">Pergaminho</h2>
+          <blockquote id="scroll-verse">—</blockquote>
+          <p id="scroll-context">—</p>
+          <button id="scroll-close">Continuar (Enter)</button>
+        </div>
+      </div>
+
+      <div id="end-screen" class="overlay hidden">
+        <div class="panel">
+          <h2 id="end-title">Missão concluída!</h2>
+          <p id="end-summary">—</p>
+          <div id="end-verse-box">
+            <blockquote id="end-verse">—</blockquote>
+          </div>
+          <div class="end-buttons">
+            <button id="end-quiz">Quiz bíblico 🪄</button>
+            <button id="end-next">Próxima missão</button>
+            <button id="end-menu">Voltar ao menu</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="quiz-screen" class="overlay hidden">
+        <div class="panel">
+          <h2>Quiz bíblico</h2>
+          <p id="quiz-question" class="quiz-question">—</p>
+          <div id="quiz-options" class="quiz-options"></div>
+          <div id="quiz-result" class="hidden">
+            <div id="quiz-feedback" class="quiz-feedback">—</div>
+            <p id="quiz-explain" class="quiz-explain">—</p>
+            <button id="quiz-continue">Continuar →</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="pause-menu" class="overlay hidden">
+        <div class="panel">
+          <h2>Pausa</h2>
+          <p class="pause-hint">Pressione <kbd>P</kbd> para continuar.</p>
+          <div class="pause-buttons">
+            <button id="pause-resume">▶ Continuar</button>
+            <button id="pause-restart">↻ Recomeçar fase</button>
+            <button id="pause-tomenu">☰ Voltar ao menu</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="gameover" class="overlay hidden">
+        <div class="panel">
+          <h2>Fim de jornada</h2>
+          <p>Todas as vidas foram perdidas. A graça é nova a cada manhã — tente de novo.</p>
+          <button id="gameover-retry">Tentar de novo</button>
+          <button id="gameover-menu">Voltar ao menu</button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="levels.js?v=10"></script>
+  <script src="game.js?v=10"></script>
+</body>
+</html>
