@@ -494,6 +494,67 @@ const MISSIONS = [
   },
 
   {
+    id: "pedro",
+    hero: "Pedro",
+    title: "Pedro caminha sobre as águas",
+    reference: "Mateus 14:22-33",
+    intro: "Os apóstolos remavam contra o vento na quarta vigília. Jesus aparece sobre o mar revolto. Pegue o ícone da oração no barco — só a fé acalma as ondas e leva ao encontro do Mestre.",
+    bgTop: "#10203a",
+    bgBottom: "#3a5a8a",
+    groundColor: "#5a3a1a",
+    accent: "#ffe27a",
+    closingVerse: "\"Verdadeiramente tu és o Filho de Deus.\" — Mateus 14:33",
+    scrolls: [
+      {
+        title: "Vento contrário",
+        verse: "\"O barco estava já no meio do mar, açoitado pelas ondas; porque o vento era contrário.\" — Mateus 14:24",
+        context: "Jesus tinha mandado partir. A obediência levou os discípulos ao meio da tempestade — o caminho do Senhor às vezes atravessa o vento, não o evita."
+      },
+      {
+        title: "Sobre o mar",
+        verse: "\"Na quarta vigília da noite, foi Jesus ter com eles, andando sobre o mar.\" — Mateus 14:25",
+        context: "Por volta das 3h da manhã. O Senhor pisa o caos primordial — o mar — como quem pisa terra firme. A criação reconhece o Criador."
+      },
+      {
+        title: "Manda-me ir",
+        verse: "\"Senhor, se és tu, manda-me ir ter contigo por sobre as águas.\" — Mateus 14:28",
+        context: "Pedro não improvisa. Pede a ordem. Fé verdadeira não inventa caminho — responde ao chamado do Mestre."
+      },
+      {
+        title: "A mão estendida",
+        verse: "\"Logo Jesus, estendendo a mão, segurou-o, e disse-lhe: Homem de pequena fé, por que duvidaste?\" — Mateus 14:31",
+        context: "Pedro afundou ao olhar para o vento. Antes da repreensão, vem o socorro: a graça resgata mesmo a fé pequena."
+      }
+    ],
+    quiz: {
+      question: "Por que Pedro começou a afundar?",
+      options: ["Cansou de caminhar sobre o mar", "Viu o vento forte e teve medo", "Foi atingido por uma onda gigante"],
+      correct: 1,
+      explain: "Mt 14:30 — \"Vendo o vento forte, teve medo.\" A fé olha para Jesus; o medo olha para a circunstância — e quem olha para a tempestade afunda nela."
+    },
+    map: [
+      "............................................................",
+      "............................................................",
+      "............................................................",
+      "............................................................",
+      ".....S...........S...............S...........S....G.........",
+      "...=====.......=====...........=====.......=====..G.........",
+      "..................................................G.........",
+      "..................................................G.........",
+      "..................................................G.........",
+      "...N..N..Y.....................................J..G.........",
+      "############~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~##########",
+      "############~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~##########",
+      "############~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~##########",
+      "############~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~##########",
+      "############~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~##########",
+      "############~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~##########",
+      "P###########~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~##########"
+    ],
+    platforms: []
+  },
+
+  {
     id: "paulo",
     hero: "Paulo",
     title: "Viagens missionárias de Paulo",

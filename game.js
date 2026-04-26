@@ -457,6 +457,9 @@
     state.kneeling = false;
     state.prayerWindows = [];
     state.angel = null;
+    state.prayerPickup = null;
+    state.jesus = null;
+    state.faithActive = false;
     state.friendNPCs = [];
     state.dying = false;
     state.dyingTimer = 0;
@@ -603,6 +606,22 @@
             collected: false
           };
           state.tileMap[y][x] = ".";
+        } else if (t === "Y") {
+          // Ícone de oração (Pedro) — pega para acalmar o mar (Mt 14:28-29).
+          state.prayerPickup = {
+            x: wx + 4, y: wy + 4,
+            w: 24, h: 26,
+            collected: false
+          };
+          state.tileMap[y][x] = ".";
+        } else if (t === "J") {
+          // Jesus sobre as águas (Mt 14:25). Encontro confirma a vitória.
+          state.jesus = {
+            x: wx, y: wy,
+            w: 28, h: 32,
+            met: false
+          };
+          state.tileMap[y][x] = ".";
         } else if (t === "B") {
           state.boss = {
             x: wx - 16,
@@ -704,6 +723,8 @@
     // In the Fornalha mission, fire tiles (`^`) act as solid floor so the
     // player stands on them (damage comes from the hazard check below).
     if (t === "^" && state.mission && state.mission.id === "fornalha") return true;
+    // Em Pedro sobre as águas, o mar vira solo após a oração (Mt 14:29).
+    if (t === "~" && state.mission && state.mission.id === "pedro" && state.faithActive) return true;
     return t === "#" || t === "=";
   }
   function isHazard(t) {
@@ -998,7 +1019,8 @@
     const inFire = footT1 === "^" || footT2 === "^";
     const inWater = footT1 === "~" || footT2 === "~";
     const protectedFromFire = state.mission.id === "fornalha" && state.angelProtection;
-    if (inWater || (inFire && !protectedFromFire)) {
+    const walkingOnWater = state.mission.id === "pedro" && state.faithActive;
+    if ((inWater && !walkingOnWater) || (inFire && !protectedFromFire)) {
       hurtPlayer();
     }
 
@@ -1152,6 +1174,47 @@
           title: "O quarto homem",
           verse: "\"Vejo quatro homens soltos, andando no meio do fogo... o aspecto do quarto é semelhante ao Filho de Deus.\" — Daniel 3:25",
           context: "O rei vê QUATRO onde só três foram lançados. A presença divina no meio do fogo — leitura cristológica antiga."
+        });
+      }
+    }
+
+    // Ícone de oração (Pedro) — coletar = mar se acalma, fé sustenta o passo.
+    if (state.prayerPickup && !state.prayerPickup.collected) {
+      const pp = state.prayerPickup;
+      if (rectsOverlap(p, pp)) {
+        pp.collected = true;
+        state.faithActive = true;
+        state.score += 250;
+        updateHud();
+        sfx("finish");
+        spawnParticles(pp.x + pp.w / 2, pp.y + pp.h / 2, {
+          count: 36, color: "#cfe8ff", size: 3, life: 50, speed: 3.2, gravity: -0.05
+        });
+        spawnParticles(pp.x + pp.w / 2, pp.y + pp.h / 2, {
+          count: 18, color: "#ffffff", size: 2, life: 40, speed: 2.6
+        });
+        openTrigger({
+          title: "Manda-me ir",
+          verse: "\"Senhor, se és tu, manda-me ir ter contigo por sobre as águas... E Pedro, descendo do barco, andou sobre as águas.\" — Mateus 14:28-29",
+          context: "A oração precede o passo. Quando o coração se aquieta diante do Senhor, o mar revolto também se aquieta — e a fé encontra chão onde só havia abismo."
+        });
+      }
+    }
+
+    // Jesus sobre as águas (Pedro) — encontro confirma a vitória (Mt 14:33).
+    if (state.jesus && !state.jesus.met) {
+      if (rectsOverlap(p, state.jesus)) {
+        state.jesus.met = true;
+        state.score += 400;
+        updateHud();
+        sfx("finish");
+        spawnParticles(state.jesus.x + 14, state.jesus.y + 16, {
+          count: 40, color: "#ffe080", size: 3, life: 60, speed: 3.5, gravity: -0.04
+        });
+        openTrigger({
+          title: "Verdadeiramente, o Filho de Deus",
+          verse: "\"Os que estavam no barco vieram e adoraram-no, dizendo: És verdadeiramente o Filho de Deus.\" — Mateus 14:33",
+          context: "O encontro no meio do mar não termina na repreensão — termina em adoração. A travessia da fé revela quem é Jesus."
         });
       }
     }
@@ -1443,6 +1506,11 @@
       }
     }
 
+    // Casco e mastro do barco (Pedro) — sobre os '#' do começo da fase.
+    if (state.mission && state.mission.id === "pedro") {
+      drawBoatDecor(camX);
+    }
+
     // Scrolls
     for (const s of state.scrolls) {
       if (s.collected) continue;
@@ -1480,6 +1548,16 @@
     // Anjo (Fornalha — o quarto homem)
     if (state.angel) {
       drawAngel(state.angel.x - camX, state.angel.y, state.angel.collected);
+    }
+
+    // Ícone de oração (Pedro) — coletável dentro do barco.
+    if (state.prayerPickup && !state.prayerPickup.collected) {
+      drawPrayerIcon(state.prayerPickup.x - camX, state.prayerPickup.y);
+    }
+
+    // Jesus sobre as águas (Pedro) — figura no fim da travessia.
+    if (state.jesus) {
+      drawJesus(state.jesus.x - camX, state.jesus.y, state.jesus.met);
     }
 
     // Manna
@@ -1681,6 +1759,25 @@
       }
     }
 
+    // HUD — Pedro sobre as águas
+    if (state.mission && state.mission.id === "pedro" && !state.finishing) {
+      ctx.fillStyle = "rgba(0,0,0,0.55)";
+      ctx.fillRect(12, 12, 300, 50);
+      ctx.font = "bold 13px system-ui";
+      ctx.textAlign = "left";
+      ctx.fillStyle = "#ffe27a";
+      if (!state.faithActive) {
+        ctx.fillText("Mar revolto — pegue o ícone da oração", 22, 28);
+        ctx.fillStyle = "rgba(200,220,255,0.75)";
+        ctx.fillText("Sair do barco antes da oração = afundar", 22, 48);
+      } else {
+        ctx.fillStyle = "#9aee9a";
+        ctx.fillText("Fé sustenta o passo · andar até Jesus", 22, 28);
+        ctx.fillStyle = state.jesus && state.jesus.met ? "#9aee9a" : "rgba(200,200,200,0.65)";
+        ctx.fillText(`Encontro: ${state.jesus && state.jesus.met ? "✓" : "—"}`, 22, 48);
+      }
+    }
+
     // Finishing banner
     if (state.finishing) {
       ctx.fillStyle = "rgba(0,0,0,0.45)";
@@ -1853,6 +1950,198 @@
       ctx.arc(cx, cy, 28, 0, Math.PI * 2);
       ctx.fill();
     }
+  }
+
+  function drawPrayerIcon(x, y) {
+    // Ícone de oração — mãos postas dentro de um nimbo dourado, flutuando.
+    const bob = Math.sin(state.t / 16) * 2;
+    const pulse = 0.5 + Math.sin(state.t / 9) * 0.25;
+    const cx = x + 12;
+    const cy = y + 13 + bob;
+    // aura
+    const g = ctx.createRadialGradient(cx, cy, 2, cx, cy, 22);
+    g.addColorStop(0, `rgba(255,240,170,${pulse * 0.85})`);
+    g.addColorStop(0.6, `rgba(255,220,120,${pulse * 0.3})`);
+    g.addColorStop(1, "rgba(255,200,100,0)");
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(cx, cy, 22, 0, Math.PI * 2);
+    ctx.fill();
+    // cartão de oração estilizado (similar à janela do Daniel)
+    ctx.fillStyle = "#f0dca4";
+    ctx.fillRect(x + 3, y + 3 + bob, 18, 22);
+    ctx.fillStyle = "#a88a4a";
+    ctx.fillRect(x + 3, y + 3 + bob, 18, 3);
+    ctx.fillRect(x + 3, y + 22 + bob, 18, 3);
+    // mãos postas (silhueta simples)
+    ctx.fillStyle = "#e6c08a";
+    ctx.beginPath();
+    ctx.ellipse(cx - 2, cy + 2, 2.2, 4, -0.25, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(cx + 2, cy + 2, 2.2, 4, 0.25, 0, Math.PI * 2);
+    ctx.fill();
+    // brilho central
+    ctx.fillStyle = `rgba(255,255,255,${pulse})`;
+    ctx.fillRect(cx - 1, cy - 4, 2, 4);
+    // pequeno halo acima
+    ctx.strokeStyle = `rgba(255,215,90,${pulse})`;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.ellipse(cx, cy - 6, 4, 1.8, 0, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+
+  function drawJesus(x, y, met) {
+    // Jesus sobre as águas — túnica branca, manto azul, halo, sem asas.
+    const bob = Math.sin(state.t / 18) * 2;
+    const pulse = 0.5 + Math.sin(state.t / 9) * 0.2;
+    const cx = x + 14;
+    const cy = y + 18 + bob;
+    // reflexo na água
+    ctx.fillStyle = "rgba(255,255,255,0.18)";
+    ctx.beginPath();
+    ctx.ellipse(cx, y + 34, 14, 3, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // aura suave
+    const g = ctx.createRadialGradient(cx, cy, 2, cx, cy, 36);
+    g.addColorStop(0, `rgba(255,250,210,${pulse * 0.55})`);
+    g.addColorStop(0.6, `rgba(255,235,160,${pulse * 0.18})`);
+    g.addColorStop(1, "rgba(255,200,100,0)");
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(cx, cy, 36, 0, Math.PI * 2);
+    ctx.fill();
+    // túnica longa branca
+    ctx.fillStyle = "#fafaff";
+    ctx.beginPath();
+    ctx.moveTo(cx - 8, cy - 4);
+    ctx.lineTo(cx + 8, cy - 4);
+    ctx.lineTo(cx + 11, cy + 16);
+    ctx.lineTo(cx - 11, cy + 16);
+    ctx.closePath();
+    ctx.fill();
+    // sombras suaves nas dobras
+    ctx.fillStyle = "rgba(180,190,210,0.35)";
+    ctx.fillRect(cx - 1, cy - 4, 2, 20);
+    // manto azul atravessado no peito
+    ctx.fillStyle = "#3a5a9a";
+    ctx.beginPath();
+    ctx.moveTo(cx - 9, cy - 1);
+    ctx.lineTo(cx + 9, cy + 4);
+    ctx.lineTo(cx + 8, cy + 8);
+    ctx.lineTo(cx - 9, cy + 3);
+    ctx.closePath();
+    ctx.fill();
+    // braço estendido (lado direito, em direção ao Pedro)
+    ctx.fillStyle = "#fafaff";
+    ctx.fillRect(cx + 4, cy + 1, 10, 4);
+    ctx.fillStyle = "#e6c08a";
+    ctx.fillRect(cx + 13, cy + 1, 3, 3);
+    // cabeça
+    ctx.fillStyle = "#e6c08a";
+    ctx.beginPath();
+    ctx.arc(cx, cy - 9, 5, 0, Math.PI * 2);
+    ctx.fill();
+    // cabelos
+    ctx.fillStyle = "#5a3a1c";
+    ctx.beginPath();
+    ctx.arc(cx, cy - 11, 5.5, Math.PI, Math.PI * 2);
+    ctx.fill();
+    ctx.fillRect(cx - 5, cy - 10, 2, 6);
+    ctx.fillRect(cx + 3, cy - 10, 2, 6);
+    // barba leve
+    ctx.fillStyle = "#5a3a1c";
+    ctx.fillRect(cx - 3, cy - 6, 6, 2);
+    // halo dourado
+    ctx.strokeStyle = `rgba(255,215,90,${pulse + 0.2})`;
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.ellipse(cx, cy - 13, 7, 2.8, 0, 0, Math.PI * 2);
+    ctx.stroke();
+    // raios cruciformes no halo
+    ctx.strokeStyle = `rgba(255,235,150,${pulse})`;
+    ctx.lineWidth = 1;
+    for (let i = 0; i < 4; i++) {
+      const a = (i / 4) * Math.PI * 2 + state.t * 0.005;
+      ctx.beginPath();
+      ctx.moveTo(cx + Math.cos(a) * 7, cy - 13 + Math.sin(a) * 2.8);
+      ctx.lineTo(cx + Math.cos(a) * 11, cy - 13 + Math.sin(a) * 4);
+      ctx.stroke();
+    }
+    // confirmação do encontro — brilho extra ao redor
+    if (met) {
+      ctx.fillStyle = "rgba(255,250,200,0.12)";
+      ctx.beginPath();
+      ctx.arc(cx, cy, 30, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  function drawBoatDecor(camX) {
+    // Casco do barco dos discípulos — desenhado sobre o piso de '#' nos
+    // tiles 0..11 (linhas 10..16). Apenas decorativo; a colisão usa os '#'.
+    const baseX = -camX;
+    const deckY = 10 * TILE;       // topo da linha 10 (deck)
+    const hullEnd = 16 * TILE + TILE; // fundo da linha 16
+    // proa curva à direita
+    ctx.fillStyle = "#5a3a1c";
+    ctx.beginPath();
+    ctx.moveTo(baseX + 12 * TILE - 4, deckY);
+    ctx.quadraticCurveTo(baseX + 12 * TILE + 18, deckY + (hullEnd - deckY) / 2,
+                         baseX + 12 * TILE - 4, hullEnd);
+    ctx.lineTo(baseX + 11 * TILE, hullEnd);
+    ctx.lineTo(baseX + 11 * TILE, deckY);
+    ctx.closePath();
+    ctx.fill();
+    // ranhuras horizontais nas tábuas (toda a extensão do casco)
+    ctx.strokeStyle = "#3a2410";
+    ctx.lineWidth = 1;
+    for (let row = 0; row < 6; row++) {
+      const yy = deckY + 4 + row * 12;
+      ctx.beginPath();
+      ctx.moveTo(baseX, yy);
+      ctx.lineTo(baseX + 12 * TILE + 14, yy);
+      ctx.stroke();
+    }
+    // borda superior (corrimão)
+    ctx.fillStyle = "#7a4f28";
+    ctx.fillRect(baseX, deckY - 4, 12 * TILE + 4, 4);
+    ctx.fillStyle = "#c89a4a";
+    ctx.fillRect(baseX, deckY - 4, 12 * TILE + 4, 1);
+    // mastro
+    const mastX = baseX + 5 * TILE + TILE / 2;
+    const mastTop = 4 * TILE + 4;
+    ctx.fillStyle = "#5a3a1c";
+    ctx.fillRect(mastX - 2, mastTop, 4, deckY - mastTop + 2);
+    // travessão
+    ctx.fillStyle = "#3a2410";
+    ctx.fillRect(mastX - 18, mastTop + 8, 36, 3);
+    // vela retangular esticada (com leve ondulação)
+    const sailSwing = Math.sin(state.t / 26) * 2;
+    ctx.fillStyle = "#f5efd6";
+    ctx.beginPath();
+    ctx.moveTo(mastX - 18, mastTop + 11);
+    ctx.lineTo(mastX + 18, mastTop + 11);
+    ctx.lineTo(mastX + 22 + sailSwing, mastTop + 11 + 78);
+    ctx.lineTo(mastX - 22 + sailSwing, mastTop + 11 + 78);
+    ctx.closePath();
+    ctx.fill();
+    // dobras na vela
+    ctx.strokeStyle = "rgba(180,160,110,0.55)";
+    ctx.lineWidth = 1;
+    for (let i = 0; i < 4; i++) {
+      const fx = mastX - 12 + i * 8;
+      ctx.beginPath();
+      ctx.moveTo(fx, mastTop + 12);
+      ctx.lineTo(fx + sailSwing, mastTop + 88);
+      ctx.stroke();
+    }
+    // ponta do mastro
+    ctx.fillStyle = "#c89a4a";
+    ctx.beginPath();
+    ctx.arc(mastX, mastTop, 3, 0, Math.PI * 2);
+    ctx.fill();
   }
 
   function drawRiacho(r, camX) {
@@ -2056,11 +2345,50 @@
         ctx.fillRect(x, y, TILE, 2);
       }
     } else if (t === "~") {
-      const shift = Math.sin(state.t / 20 + x / 30) * 2;
-      ctx.fillStyle = "#1f4f8a";
-      ctx.fillRect(x, y + shift, TILE, TILE);
-      ctx.fillStyle = "rgba(255,255,255,0.15)";
-      ctx.fillRect(x, y + shift, TILE, 2);
+      const isPedro = state.mission && state.mission.id === "pedro";
+      if (isPedro && state.faithActive) {
+        // Mar acalmado pela fé — superfície quase espelhada (Mt 14:32).
+        ctx.fillStyle = "#1f5fa8";
+        ctx.fillRect(x, y, TILE, TILE);
+        const ripple = Math.sin(state.t / 30 + x / 40) * 0.6;
+        ctx.fillStyle = "rgba(255,255,255,0.22)";
+        ctx.fillRect(x, y + ripple, TILE, 2);
+        ctx.fillStyle = "rgba(255,255,255,0.08)";
+        ctx.fillRect(x + 4, y + 10, TILE - 8, 1);
+        ctx.fillRect(x + 8, y + 18, TILE - 16, 1);
+      } else if (isPedro) {
+        // Mar revolto — ondas altas com cristas brancas (Mt 14:24).
+        const shift = Math.sin(state.t / 9 + x / 22) * 5;
+        const foam = Math.cos(state.t / 7 + x / 18) * 2;
+        ctx.fillStyle = "#0e2a55";
+        ctx.fillRect(x, y, TILE, TILE);
+        ctx.fillStyle = "#1a4a90";
+        ctx.beginPath();
+        ctx.moveTo(x, y + 6 + shift);
+        ctx.quadraticCurveTo(x + TILE / 2, y - 1 + shift + foam, x + TILE, y + 6 + shift);
+        ctx.lineTo(x + TILE, y + TILE);
+        ctx.lineTo(x, y + TILE);
+        ctx.closePath();
+        ctx.fill();
+        // crista de espuma
+        ctx.fillStyle = "rgba(255,255,255,0.7)";
+        ctx.fillRect(x, y + 5 + shift, TILE / 2, 1.5);
+        ctx.fillRect(x + TILE / 2, y + 7 + shift + foam, TILE / 2, 1.5);
+        // gotículas
+        ctx.fillStyle = "rgba(255,255,255,0.4)";
+        ctx.beginPath();
+        ctx.arc(x + 6, y + 3 + shift, 1.4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(x + 22, y + 4 + shift + foam, 1.2, 0, Math.PI * 2);
+        ctx.fill();
+      } else {
+        const shift = Math.sin(state.t / 20 + x / 30) * 2;
+        ctx.fillStyle = "#1f4f8a";
+        ctx.fillRect(x, y + shift, TILE, TILE);
+        ctx.fillStyle = "rgba(255,255,255,0.15)";
+        ctx.fillRect(x, y + shift, TILE, 2);
+      }
     }
   }
 
