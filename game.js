@@ -339,10 +339,13 @@
       const card = document.createElement("button");
       card.className = "mission-card" + (done ? " mission-done" : "");
       card.innerHTML = `
-        <div class="ref">Missão ${i + 1} · ${m.reference} ${done ? '<span class="done-badge">✓</span>' : ''}</div>
-        <div class="hero">${m.hero}</div>
-        <div class="desc">${m.title}</div>
-        ${done ? `<div class="best-score">🏆 recorde: ${done.bestScore} pts · ${done.bestScrolls || 0} pergaminhos</div>` : ''}
+        <div class="icon" aria-hidden="true">${m.icon || "📖"}</div>
+        <div class="info">
+          <div class="ref">Missão ${i + 1} · ${m.reference} ${done ? '<span class="done-badge">✓</span>' : ''}</div>
+          <div class="hero">${m.hero}</div>
+          <div class="desc">${m.title}</div>
+          ${done ? `<div class="best-score">🏆 recorde: ${done.bestScore} pts · ${done.bestScrolls || 0} pergaminhos</div>` : ''}
+        </div>
       `;
       card.addEventListener("click", () => startMission(i));
       list.appendChild(card);

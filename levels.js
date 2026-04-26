@@ -23,6 +23,7 @@ const MISSIONS = [
   {
     id: "jonas",
     hero: "Jonas",
+    icon: "🐋",
     title: "Jonas a caminho de Nínive",
     reference: "Jonas 1–3",
     intro: "Chamado por Deus para pregar em Nínive, Jonas tenta fugir. Atravesse a tempestade no ventre do grande peixe.",
@@ -97,6 +98,7 @@ const MISSIONS = [
   {
     id: "davi",
     hero: "Davi",
+    icon: "🪨",
     title: "Davi contra Golias",
     reference: "1 Samuel 17",
     intro: "No Vale de Elá, um jovem pastor enfrenta um gigante filisteu. Recolha a funda no caminho — só ela derrota Golias.",
@@ -168,6 +170,7 @@ const MISSIONS = [
   {
     id: "mar",
     hero: "Moisés",
+    icon: "🌊",
     title: "A travessia do mar",
     reference: "Êxodo 14–15",
     intro: "Preso entre o exército do Faraó e o mar, Moisés estende a vara. As águas se abrem e formam um muro — corra antes que se fechem atrás.",
@@ -229,6 +232,7 @@ const MISSIONS = [
   {
     id: "moises",
     hero: "Moisés",
+    icon: "🍞",
     title: "A travessia do deserto",
     reference: "Êxodo 14–16",
     intro: "Do Mar Vermelho ao maná no deserto. Desvie dos espinhos, recolha o maná que cai dos céus e alcance a terra prometida.",
@@ -298,6 +302,7 @@ const MISSIONS = [
   {
     id: "sinai",
     hero: "Moisés",
+    icon: "⛰️",
     title: "Moisés no Sinai",
     reference: "Êxodo 19–34",
     intro: "Suba ao Sinai, receba as tábuas. Desça e encontre o bezerro de ouro no vale — as tábuas se quebram. Suba o monte de novo: Deus renova o pacto.",
@@ -374,6 +379,7 @@ const MISSIONS = [
   {
     id: "fornalha",
     hero: "Sadraque, Mesaque e Abede-Nego",
+    icon: "🔥",
     title: "A fornalha ardente",
     reference: "Daniel 3",
     intro: "Ao som da trombeta, todos se prostraram diante da estátua de Nabucodonosor. Três jovens ficaram de pé. Foram lançados no fogo — mas um quarto homem apareceu com eles.",
@@ -435,6 +441,7 @@ const MISSIONS = [
   {
     id: "leoes",
     hero: "Daniel",
+    icon: "🦁",
     title: "Daniel na cova dos leões",
     reference: "Daniel 6",
     intro: "Os sátrapas decretam: orar a qualquer um que não seja o rei = cova dos leões. Daniel continua orando diante da janela. [B] ajoelha, [O] chama o anjo.",
@@ -496,6 +503,7 @@ const MISSIONS = [
   {
     id: "pedro",
     hero: "Pedro",
+    icon: "⛵",
     title: "Pedro caminha sobre as águas",
     reference: "Mateus 14:22-33",
     intro: "Os apóstolos remavam contra o vento na quarta vigília. Jesus aparece sobre o mar revolto. Pegue o ícone da oração no barco — só a fé acalma as ondas e leva ao encontro do Mestre.",
@@ -557,6 +565,7 @@ const MISSIONS = [
   {
     id: "paulo",
     hero: "Paulo",
+    icon: "✉️",
     title: "Viagens missionárias de Paulo",
     reference: "Atos 13–28; 2 Coríntios 11",
     intro: "Naufrágios, perseguições, prisões — e ainda assim, pregar o evangelho. Cruze o Mediterrâneo no navio e chegue a Roma.",

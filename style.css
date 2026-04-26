@@ -142,8 +142,31 @@ html, body {
   color: inherit;
   font: inherit;
   display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 14px;
+}
+.mission-card .icon {
+  font-size: 38px;
+  flex-shrink: 0;
+  width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(59, 72, 144, 0.25);
+  border-radius: 10px;
+  line-height: 1;
+}
+.mission-card.mission-done .icon {
+  background: rgba(108, 207, 122, 0.18);
+}
+.mission-card .info {
+  display: flex;
   flex-direction: column;
   gap: 4px;
+  flex: 1;
+  min-width: 0;
 }
 .mission-card:hover,
 .mission-card:focus-visible {
@@ -419,7 +442,8 @@ body.touch-mode .touch-controls { display: flex; }
     gap: 8px;
     max-height: 58vh;
   }
-  .mission-card { padding: 12px 14px; }
+  .mission-card { padding: 12px 14px; gap: 12px; }
+  .mission-card .icon { font-size: 32px; width: 46px; height: 46px; }
   .mission-card .hero { font-size: 16px; }
   .mission-card .desc { font-size: 13px; }
   .controls-help { font-size: 11px; }
@@ -473,7 +497,8 @@ body.touch-mode .touch-controls { display: flex; }
     margin-bottom: 8px;
     max-height: 60vh;
   }
-  .mission-card { padding: 8px 10px; }
+  .mission-card { padding: 8px 10px; gap: 8px; }
+  .mission-card .icon { font-size: 24px; width: 36px; height: 36px; border-radius: 8px; }
   .mission-card .hero { font-size: 14px; }
   .mission-card .desc { font-size: 11px; }
   .controls-help { padding-top: 6px; font-size: 11px; }
