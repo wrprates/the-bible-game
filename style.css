@@ -326,6 +326,16 @@ button:hover { background: #ffd54a; }
   height: 78px;
   font-size: 28px;
 }
+.touch-action {
+  width: 56px;
+  height: 56px;
+  font-size: 22px;
+  background: rgba(20, 28, 64, 0.55);
+  border-color: rgba(255, 226, 122, 0.5);
+}
+@media (max-width: 720px) {
+  .touch-action { width: 48px; height: 48px; font-size: 18px; }
+}
 
 /* Show touch controls on coarse pointers (phones/tablets) */
 @media (hover: none) and (pointer: coarse) {

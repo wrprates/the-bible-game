@@ -282,7 +282,38 @@
     window.addEventListener("touchstart", () => {
       document.body.classList.add("touch-mode");
     }, { once: true, passive: true });
+
+    // Contextual action buttons (X for Davi's sling, B/O for Daniel).
+    // We dispatch synthetic KeyboardEvents so the existing keydown/keyup
+    // handlers run unchanged — no duplication of game logic.
+    const actionButtons = document.querySelectorAll(".touch-action[data-event-key]");
+    const fireKey = (type, key) => {
+      const ev = new KeyboardEvent(type, { key, bubbles: true });
+      window.dispatchEvent(ev);
+    };
+    actionButtons.forEach((btn) => {
+      const key = btn.getAttribute("data-event-key");
+      const down = (e) => { e.preventDefault(); btn.classList.add("active"); initAudio(); fireKey("keydown", key); };
+      const up   = (e) => { e.preventDefault(); btn.classList.remove("active"); fireKey("keyup", key); };
+      btn.addEventListener("touchstart",  down, { passive: false });
+      btn.addEventListener("touchend",    up,   { passive: false });
+      btn.addEventListener("touchcancel", up,   { passive: false });
+      btn.addEventListener("mousedown",   down);
+      btn.addEventListener("mouseup",     up);
+      btn.addEventListener("mouseleave",  () => { if (btn.classList.contains("active")) { btn.classList.remove("active"); fireKey("keyup", key); }});
+      btn.addEventListener("contextmenu", (e) => e.preventDefault());
+    });
   })();
+
+  // Show/hide contextual action buttons based on the current mission.
+  // Called from startMission() and showMenu().
+  function updateMissionActions() {
+    const missionId = state.mission && state.screen === "playing" ? state.mission.id : null;
+    document.querySelectorAll(".touch-action[data-mission]").forEach((btn) => {
+      const matches = btn.getAttribute("data-mission") === missionId;
+      btn.classList.toggle("hidden", !matches);
+    });
+  }
   $("pause-restart").addEventListener("click", () => {
     state.paused = false;
     pauseEl.classList.add("hidden");
@@ -343,6 +374,7 @@
     pauseEl.classList.add("hidden");
     quizEl.classList.add("hidden");
     updateHud();
+    updateMissionActions();
   }
 
   function hideAllOverlays() {
@@ -639,6 +671,7 @@
     hideAllOverlays();
     state.screen = "playing";
     updateHud();
+    updateMissionActions();
   }
 
   // --- Helpers ---------------------------------------------------------------

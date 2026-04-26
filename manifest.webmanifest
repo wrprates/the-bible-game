@@ -1,0 +1,16 @@
+{
+  "name": "The Bible Game — Jornadas Bíblicas",
+  "short_name": "Bible Game",
+  "description": "Plataforma 2D com missões bíblicas: Moisés, Davi, Daniel e mais.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#0b1020",
+  "theme_color": "#0b1020",
+  "lang": "pt-BR",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}

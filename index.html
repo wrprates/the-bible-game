@@ -10,6 +10,9 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="theme-color" content="#0b1020" />
   <title>The Bible Game — Jornadas Bíblicas</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" type="image/svg+xml" href="icon.svg" />
+  <link rel="apple-touch-icon" href="icon.svg" />
   <link rel="stylesheet" href="style.css?v=10" />
 </head>
 <body>
@@ -40,6 +43,9 @@
           <button id="touch-right" class="touch-btn" data-key="arrowright" aria-label="Direita">▶</button>
         </div>
         <div class="touch-actions">
+          <button class="touch-btn touch-action hidden" data-event-key="x" data-mission="davi" aria-label="Atirar funda">🎯</button>
+          <button class="touch-btn touch-action hidden" data-event-key="b" data-mission="leoes" aria-label="Ajoelhar para orar">🙏</button>
+          <button class="touch-btn touch-action hidden" data-event-key="o" data-mission="leoes" aria-label="Invocar anjo">✨</button>
           <button id="touch-jump" class="touch-btn touch-jump" data-key=" " aria-label="Pular">▲</button>
         </div>
       </div>
@@ -119,6 +125,13 @@
   </div>
 
   <script src="levels.js?v=10"></script>
-  <script src="game.js?v=11"></script>
+  <script src="game.js?v=12"></script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("sw.js").catch(() => {});
+      });
+    }
+  </script>
 </body>
 </html>
