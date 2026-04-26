@@ -571,6 +571,19 @@
             bounceCooldown: 0
           });
           state.tileMap[y][x] = ".";
+        } else if (t === "U") {
+          // Urso — recordação pastoril de Davi (1 Sm 17:34-37). Stomp normal.
+          state.enemies.push({
+            x: wx,
+            y: wy + 2,
+            w: 32,
+            h: 28,
+            vx: -0.7,
+            vy: 0,
+            alive: true,
+            type: "bear"
+          });
+          state.tileMap[y][x] = ".";
         } else if (t === "W") {
           // Janela de oração — preserva o tile (renderizado como janela).
           state.prayerWindows.push({ x: wx, y: wy });
@@ -1001,10 +1014,11 @@
       if (e.bounceCooldown > 0) e.bounceCooldown--;
 
       if (rectsOverlap(p, e)) {
-        if (e.type === "lion" && (e.passive || state.angelSummoned)) {
+        const lionInDen = e.type === "lion" && state.mission.id === "leoes";
+        if (lionInDen && (e.passive || state.angelSummoned)) {
           // Leão pacificado — boca fechada pelo anjo, sem dano (Dn 6:22).
-        } else if (e.type === "lion") {
-          // Leão ativo — qualquer contato mata. Único jeito: orar + chamar anjo.
+        } else if (lionInDen) {
+          // Leão ativo na cova — só o anjo livra (Dn 6:22).
           hurtPlayer();
         } else if (p.vy > 1 && p.y + p.h - e.y < 16) {
           if (e.type === "shield") {
@@ -2336,6 +2350,92 @@
       // língua
       ctx.fillStyle = "#c04040";
       ctx.fillRect(x + 7, y + 21 + roar * 0.6, 4, 1);
+      return;
+    }
+    if (type === "bear") {
+      // URSO — recordação pastoril (1 Sm 17:34-37). Marrom escuro, robusto,
+      // orelhas redondas, focinho proeminente, garras claras.
+      ctx.fillStyle = "rgba(0,0,0,0.25)";
+      ctx.fillRect(x + 2, y + 26, 28, 2);
+      // corpo robusto
+      ctx.fillStyle = "#5a3a1c";
+      ctx.fillRect(x + 6, y + 12, 24, 14);
+      // hump nas costas (típico do urso pardo)
+      ctx.fillStyle = "#4a2e14";
+      ctx.beginPath();
+      ctx.arc(x + 22, y + 12, 6, Math.PI, Math.PI * 2);
+      ctx.fill();
+      // textura do pelo
+      ctx.fillStyle = "#42280f";
+      ctx.fillRect(x + 8, y + 21, 20, 2);
+      // patas com garras
+      ctx.fillStyle = "#3a2410";
+      ctx.fillRect(x + 7, y + 24, 6, 4);
+      ctx.fillRect(x + 23, y + 24, 6, 4);
+      ctx.fillStyle = "#f0e0c0";
+      ctx.fillRect(x + 7, y + 27, 1, 1);
+      ctx.fillRect(x + 9, y + 27, 1, 1);
+      ctx.fillRect(x + 11, y + 27, 1, 1);
+      ctx.fillRect(x + 23, y + 27, 1, 1);
+      ctx.fillRect(x + 25, y + 27, 1, 1);
+      ctx.fillRect(x + 27, y + 27, 1, 1);
+      // cauda curta
+      ctx.fillStyle = "#3a2410";
+      ctx.fillRect(x + 28, y + 18, 2, 3);
+      // cabeça
+      ctx.fillStyle = "#5a3a1c";
+      ctx.beginPath();
+      ctx.arc(x + 8, y + 14, 7, 0, Math.PI * 2);
+      ctx.fill();
+      // orelhas redondas
+      ctx.fillStyle = "#4a2e14";
+      ctx.beginPath();
+      ctx.arc(x + 4, y + 8, 2.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(x + 12, y + 8, 2.5, 0, Math.PI * 2);
+      ctx.fill();
+      // interior das orelhas
+      ctx.fillStyle = "#7a5028";
+      ctx.beginPath();
+      ctx.arc(x + 4, y + 8, 1, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(x + 12, y + 8, 1, 0, Math.PI * 2);
+      ctx.fill();
+      // focinho claro
+      ctx.fillStyle = "#a07a4a";
+      ctx.beginPath();
+      ctx.ellipse(x + 3, y + 16, 4, 3, 0, 0, Math.PI * 2);
+      ctx.fill();
+      // nariz preto
+      ctx.fillStyle = "#0a0500";
+      ctx.beginPath();
+      ctx.arc(x + 1, y + 15, 1.6, 0, Math.PI * 2);
+      ctx.fill();
+      // olhos
+      ctx.fillStyle = "#0a0500";
+      ctx.fillRect(x + 6, y + 11, 2, 2);
+      ctx.fillRect(x + 11, y + 11, 2, 2);
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(x + 6, y + 11, 1, 1);
+      ctx.fillRect(x + 11, y + 11, 1, 1);
+      // boca aberta com presas
+      ctx.fillStyle = "#1a0500";
+      ctx.fillRect(x + 4, y + 18, 5, 2);
+      ctx.fillStyle = "#ffffff";
+      ctx.beginPath();
+      ctx.moveTo(x + 5, y + 18);
+      ctx.lineTo(x + 5.5, y + 20);
+      ctx.lineTo(x + 6, y + 18);
+      ctx.closePath();
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(x + 7, y + 18);
+      ctx.lineTo(x + 7.5, y + 20);
+      ctx.lineTo(x + 8, y + 18);
+      ctx.closePath();
+      ctx.fill();
       return;
     }
     if (type === "chariot") {
