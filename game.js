@@ -245,6 +245,44 @@
 
   $("hud-pause").addEventListener("click", togglePause);
   $("pause-resume").addEventListener("click", togglePause);
+
+  // ---------- On-screen touch controls (mobile) ----------
+  // Buttons set the same state.keys flags the keyboard handler uses, so the
+  // game logic doesn't care whether input came from a key or a finger.
+  (function bindTouchControls() {
+    const buttons = document.querySelectorAll(".touch-btn[data-key]");
+    if (!buttons.length) return;
+
+    const press = (key, btn) => {
+      state.keys[key] = true;
+      btn.classList.add("active");
+      initAudio();
+    };
+    const release = (key, btn) => {
+      state.keys[key] = false;
+      btn.classList.remove("active");
+    };
+
+    buttons.forEach((btn) => {
+      const key = btn.getAttribute("data-key");
+      // Touch
+      btn.addEventListener("touchstart", (e) => { e.preventDefault(); press(key, btn); }, { passive: false });
+      btn.addEventListener("touchend",   (e) => { e.preventDefault(); release(key, btn); }, { passive: false });
+      btn.addEventListener("touchcancel",(e) => { e.preventDefault(); release(key, btn); }, { passive: false });
+      // Mouse (desktop testing + hybrid devices)
+      btn.addEventListener("mousedown",  (e) => { e.preventDefault(); press(key, btn); });
+      btn.addEventListener("mouseup",    (e) => { e.preventDefault(); release(key, btn); });
+      btn.addEventListener("mouseleave", () => { if (state.keys[key]) release(key, btn); });
+      // Stop the click default so the button doesn't steal focus / trigger ghost taps
+      btn.addEventListener("contextmenu", (e) => e.preventDefault());
+    });
+
+    // Auto-show on touch-capable devices that the media query may miss
+    // (e.g. some hybrid laptops). Once any touch happens, lock it on.
+    window.addEventListener("touchstart", () => {
+      document.body.classList.add("touch-mode");
+    }, { once: true, passive: true });
+  })();
   $("pause-restart").addEventListener("click", () => {
     state.paused = false;
     pauseEl.classList.add("hidden");

@@ -2,14 +2,25 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no" />
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#0b1020" />
   <title>The Bible Game — Jornadas Bíblicas</title>
-  <link rel="stylesheet" href="style.css?v=7" />
+  <link rel="stylesheet" href="style.css?v=10" />
 </head>
 <body>
+  <div id="rotate-hint" aria-hidden="true">
+    <div class="rotate-card">
+      <div class="rotate-icon">📱↻</div>
+      <h2>Vire seu celular</h2>
+      <p>The Bible Game foi feito para tela horizontal. Gire para o modo paisagem para a melhor experiência.</p>
+    </div>
+  </div>
+
   <div id="app">
     <header class="hud">
       <div class="hud-slot"><span class="label">Missão</span><span id="hud-mission">—</span></div>
@@ -22,6 +33,16 @@
 
     <main class="stage">
       <canvas id="game" width="960" height="540"></canvas>
+
+      <div id="touch-controls" class="touch-controls" aria-hidden="true">
+        <div class="touch-dpad">
+          <button id="touch-left" class="touch-btn" data-key="arrowleft" aria-label="Esquerda">◀</button>
+          <button id="touch-right" class="touch-btn" data-key="arrowright" aria-label="Direita">▶</button>
+        </div>
+        <div class="touch-actions">
+          <button id="touch-jump" class="touch-btn touch-jump" data-key=" " aria-label="Pular">▲</button>
+        </div>
+      </div>
 
       <div id="menu" class="overlay">
         <div class="panel">
@@ -98,6 +119,6 @@
   </div>
 
   <script src="levels.js?v=10"></script>
-  <script src="game.js?v=10"></script>
+  <script src="game.js?v=11"></script>
 </body>
 </html>
