@@ -13,7 +13,7 @@
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="icon" type="image/svg+xml" href="icon.svg" />
   <link rel="apple-touch-icon" href="icon.svg" />
-  <link rel="stylesheet" href="style.css?v=10" />
+  <link rel="stylesheet" href="style.css?v=11" />
 </head>
 <body>
   <div id="rotate-hint" aria-hidden="true">
@@ -25,17 +25,17 @@
   </div>
 
   <div id="app">
-    <header class="hud">
-      <div class="hud-slot"><span class="label">Missão</span><span id="hud-mission">—</span></div>
-      <div class="hud-slot"><span class="label">Personagem</span><span id="hud-hero">—</span></div>
-      <div class="hud-slot"><span class="label">Pergaminhos</span><span id="hud-scrolls">0 / 0</span></div>
-      <div class="hud-slot"><span class="label">Vidas</span><span id="hud-lives">3</span></div>
-      <div class="hud-slot"><span class="label">Pontos</span><span id="hud-score">0</span></div>
-      <button id="hud-pause" class="hud-pause" aria-label="Pausar" title="Pausar (P)">⏸</button>
-    </header>
-
     <main class="stage">
       <canvas id="game" width="960" height="540"></canvas>
+
+      <header class="hud">
+        <div class="hud-slot"><span class="label">Missão</span><span id="hud-mission">—</span></div>
+        <div class="hud-slot"><span class="label">Personagem</span><span id="hud-hero">—</span></div>
+        <div class="hud-slot"><span class="label">Pergaminhos</span><span id="hud-scrolls">0 / 0</span></div>
+        <div class="hud-slot"><span class="label">Vidas</span><span id="hud-lives">3</span></div>
+        <div class="hud-slot"><span class="label">Pontos</span><span id="hud-score">0</span></div>
+        <button id="hud-pause" class="hud-pause" aria-label="Pausar" title="Pausar (P)">⏸</button>
+      </header>
 
       <div id="touch-controls" class="touch-controls" aria-hidden="true">
         <div class="touch-dpad">

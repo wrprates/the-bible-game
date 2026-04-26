@@ -17,17 +17,25 @@ html, body {
   gap: 12px;
 }
 .hud {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 4;
   display: grid;
   grid-template-columns: repeat(5, 1fr) auto;
   gap: 8px;
-  padding: 10px 14px;
-  background: linear-gradient(180deg, #1b2550, #0e1638);
-  border: 2px solid #3b4890;
-  border-radius: 10px;
-  box-shadow: 0 2px 0 #000 inset;
+  padding: 8px 14px 14px;
+  background: linear-gradient(180deg, rgba(11, 16, 32, 0.78) 0%, rgba(11, 16, 32, 0.55) 65%, rgba(11, 16, 32, 0) 100%);
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
   font-family: "Courier New", monospace;
   align-items: center;
+  pointer-events: none;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.85);
 }
+.hud .hud-pause { pointer-events: auto; }
 .hud-pause {
   background: #0c1230;
   border: 2px solid #3b4890;
@@ -354,8 +362,7 @@ body.touch-mode .touch-controls { display: flex; }
     grid-template-columns: repeat(3, 1fr) auto;
     grid-auto-rows: auto;
     gap: 6px 8px;
-    padding: 6px 8px;
-    border-radius: 8px;
+    padding: 6px 10px 12px;
   }
   .hud-slot .label { font-size: 9px; letter-spacing: 0.5px; }
   .hud-slot span:last-child { font-size: 13px; }
@@ -406,7 +413,7 @@ body.touch-mode .touch-controls { display: flex; }
     max-width: none;
   }
   .hud {
-    padding: 4px 8px;
+    padding: 4px 10px 10px;
     gap: 4px 8px;
     grid-template-columns: repeat(5, 1fr) auto;
   }
