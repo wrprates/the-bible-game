@@ -462,6 +462,7 @@
     state.faithActive = false;
     state.windGusts = [];
     state.nextWindAt = 120;
+    state.windHits = 0;
     state.friendNPCs = [];
     state.dying = false;
     state.dyingTimer = 0;
@@ -1246,15 +1247,30 @@
       state.windGusts = state.windGusts.filter((g) => g.life > 0 && g.x + g.w > -200);
       for (const g of state.windGusts) {
         if (rectsOverlap(p, g) && p.invuln === 0) {
-          p.vx = -3.2;
-          p.invuln = 28;
-          sfx("stonehit");
+          state.windHits++;
           spawnParticles(p.x + p.w / 2, p.y + p.h / 2, {
             count: 10, color: "#e6f0ff", size: 2, life: 22, speed: 2.4
           });
           spawnParticles(p.x + p.w / 2, p.y + p.h / 2, {
             count: 6, color: "#ffffff", size: 1.5, life: 18, speed: 1.8
           });
+          if (state.windHits >= 3) {
+            // "Vendo o vento forte, teve medo, e começando a afundar..." (Mt 14:30)
+            // Três rajadas = fé exaurida. Pedro afunda — perde a fase.
+            state.lives = 0;
+            spawnParticles(p.x + p.w / 2, p.y + p.h, {
+              count: 30, color: "#1f4f8a", size: 4, life: 50, speed: 3, gravity: 0.18
+            });
+            spawnParticles(p.x + p.w / 2, p.y + p.h, {
+              count: 18, color: "#ffffff", size: 2, life: 40, speed: 2
+            });
+            hurtPlayer();
+          } else {
+            p.vx = -3.2;
+            p.invuln = 28;
+            sfx("stonehit");
+          }
+          break;
         }
       }
     }
@@ -1820,9 +1836,22 @@
       } else {
         ctx.fillStyle = "#9aee9a";
         ctx.fillText("Fé sustenta o passo · vá até Jesus", 22, 28);
+        // Fé restante — 3 pontos que apagam a cada rajada (Mt 14:30).
+        const remaining = Math.max(0, 3 - (state.windHits || 0));
+        ctx.fillStyle = "rgba(220,235,255,0.75)";
+        ctx.fillText("Fé:", 22, 48);
+        for (let i = 0; i < 3; i++) {
+          const filled = i < remaining;
+          ctx.fillStyle = filled ? "#ffe27a" : "rgba(120,120,120,0.45)";
+          ctx.beginPath();
+          ctx.arc(56 + i * 14, 44, 4.5, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.strokeStyle = "rgba(0,0,0,0.4)";
+          ctx.lineWidth = 1;
+          ctx.stroke();
+        }
         ctx.fillStyle = state.jesus && state.jesus.met ? "#9aee9a" : "rgba(220,235,255,0.75)";
-        const enc = state.jesus && state.jesus.met ? "✓" : "—";
-        ctx.fillText(`Encontro: ${enc} · cuidado com as rajadas`, 22, 48);
+        ctx.fillText(state.jesus && state.jesus.met ? "Encontro ✓" : "Cuidado com as rajadas", 110, 48);
       }
     }
 
