@@ -460,6 +460,8 @@
     state.prayerPickup = null;
     state.jesus = null;
     state.faithActive = false;
+    state.windGusts = [];
+    state.nextWindAt = 120;
     state.friendNPCs = [];
     state.dying = false;
     state.dyingTimer = 0;
@@ -1219,6 +1221,44 @@
       }
     }
 
+    // Rajadas de vento (Pedro) — "vento contrário" / "vendo o vento forte, teve
+    // medo" (Mt 14:24,30). Spawnam após a oração e empurram Pedro pra trás.
+    if (state.mission.id === "pedro" && state.faithActive && !state.finishing && !(state.jesus && state.jesus.met)) {
+      state.nextWindAt--;
+      if (state.nextWindAt <= 0) {
+        state.nextWindAt = 80 + Math.floor(Math.random() * 60);
+        const camRightX = state.camera.x + W;
+        const yMin = 9 * TILE - 2;
+        const yMax = 10 * TILE - 8;
+        state.windGusts.push({
+          x: camRightX + 24,
+          y: yMin + Math.random() * (yMax - yMin),
+          w: 84,
+          h: 14,
+          vx: -3.6 - Math.random() * 0.8,
+          life: 360
+        });
+      }
+      for (const g of state.windGusts) {
+        g.x += g.vx;
+        g.life--;
+      }
+      state.windGusts = state.windGusts.filter((g) => g.life > 0 && g.x + g.w > -200);
+      for (const g of state.windGusts) {
+        if (rectsOverlap(p, g) && p.invuln === 0) {
+          p.vx = -3.2;
+          p.invuln = 28;
+          sfx("stonehit");
+          spawnParticles(p.x + p.w / 2, p.y + p.h / 2, {
+            count: 10, color: "#e6f0ff", size: 2, life: 22, speed: 2.4
+          });
+          spawnParticles(p.x + p.w / 2, p.y + p.h / 2, {
+            count: 6, color: "#ffffff", size: 1.5, life: 18, speed: 1.8
+          });
+        }
+      }
+    }
+
     // Sling pickup (Davi) — a funda vazia. Pedras vêm separadas, do ribeiro.
     if (state.slingPickup && !state.slingPickup.collected) {
       const sp = state.slingPickup;
@@ -1577,6 +1617,13 @@
     }
     ctx.globalAlpha = 1;
 
+    // Rajadas de vento (Pedro) — desenhadas sobre o mar, em frente ao jogador.
+    if (state.windGusts && state.windGusts.length > 0) {
+      for (const g of state.windGusts) {
+        drawWindGust(g.x - camX, g.y, state.t);
+      }
+    }
+
     // Boss — render depends on mission.
     if (state.boss && state.boss.alive) {
       const drawBoss = state.mission.id === "sinai" ? drawCalf : drawGiant;
@@ -1772,9 +1819,10 @@
         ctx.fillText("Sair do barco antes da oração = afundar", 22, 48);
       } else {
         ctx.fillStyle = "#9aee9a";
-        ctx.fillText("Fé sustenta o passo · andar até Jesus", 22, 28);
-        ctx.fillStyle = state.jesus && state.jesus.met ? "#9aee9a" : "rgba(200,200,200,0.65)";
-        ctx.fillText(`Encontro: ${state.jesus && state.jesus.met ? "✓" : "—"}`, 22, 48);
+        ctx.fillText("Fé sustenta o passo · vá até Jesus", 22, 28);
+        ctx.fillStyle = state.jesus && state.jesus.met ? "#9aee9a" : "rgba(220,235,255,0.75)";
+        const enc = state.jesus && state.jesus.met ? "✓" : "—";
+        ctx.fillText(`Encontro: ${enc} · cuidado com as rajadas`, 22, 48);
       }
     }
 
@@ -2076,6 +2124,38 @@
       ctx.arc(cx, cy, 30, 0, Math.PI * 2);
       ctx.fill();
     }
+  }
+
+  function drawWindGust(x, y, t) {
+    // Rajada — várias linhas brancas onduladas com pontas mais transparentes.
+    ctx.save();
+    for (let i = 0; i < 6; i++) {
+      const sy = y + i * 2.4;
+      const baseLen = 70 + Math.sin((t + i * 30) / 9) * 14;
+      const wave = Math.sin((t + i * 12) / 6) * 1.6;
+      const isCore = i === 2 || i === 3;
+      ctx.strokeStyle = isCore
+        ? `rgba(255,255,255,${0.85 + Math.sin(t / 5 + i) * 0.1})`
+        : `rgba(220,235,255,${0.45 + Math.sin(t / 7 + i) * 0.1})`;
+      ctx.lineWidth = isCore ? 2 : 1;
+      ctx.beginPath();
+      ctx.moveTo(x, sy + wave);
+      for (let k = 4; k <= baseLen; k += 4) {
+        const yy = sy + Math.sin((k + t) / 6) * 1.2 + wave;
+        ctx.lineTo(x + k, yy);
+      }
+      ctx.stroke();
+    }
+    // gotículas / respingo na cabeça da rajada
+    for (let i = 0; i < 4; i++) {
+      const px = x + 2 + Math.sin(t / 6 + i) * 2;
+      const py = y + 2 + i * 3 + Math.cos(t / 7 + i) * 1.5;
+      ctx.fillStyle = `rgba(255,255,255,${0.55 + Math.sin(t / 5 + i) * 0.2})`;
+      ctx.beginPath();
+      ctx.arc(px, py, 1.4, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
   }
 
   function drawBoatDecor(camX) {
